@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Controls.Primitives;
 using ITunesLibrarySynchronizer.lib.ItunesEngine;
 using System.Diagnostics;
 using System.Threading;
@@ -61,16 +53,17 @@ namespace ITunesLibrarySynchronizer
             dA.KeyFrames.Add(new LinearDoubleKeyFrame { KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(3.5)), Value = 1.0 });
             dA.KeyFrames.Add(new LinearDoubleKeyFrame { KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(4)), Value = 0.0 });
 
-            imgSaveIndicator.BeginAnimation(Image.OpacityProperty, dA);
+            imgSaveIndicator.BeginAnimation(OpacityProperty, dA);
         }
 
         void LoadItunesLibraryComplete(object sender, RunWorkerCompletedEventArgs e)
         {
             var msgObj = e.Result as BackgroundWorkerMessage;
-            if (msgObj.WorkerException != null)
-                sbBottomStatusMessage.Text = "Error: Failed parsing ITunes Library, check configuration!";
-            else
-                sbBottomStatusMessage.Text = "Status: " + msgObj.WorkResult + " records loaded in " + msgObj.MilisecondsElapsed + "ms!";
+            if (msgObj != null)
+                if (msgObj.WorkerException != null)
+                    sbBottomStatusMessage.Text = "Error: Failed parsing ITunes Library, check configuration!";
+                else
+                    sbBottomStatusMessage.Text = "Status: " + msgObj.WorkResult + " records loaded in " + msgObj.MilisecondsElapsed + "ms!";
 
             tbITunesLibraryLocation.Text = _itunesLibrary.ItunesLibraryLocation;
             btnStartSynch.IsEnabled = true;
@@ -78,7 +71,7 @@ namespace ITunesLibrarySynchronizer
 
         void LoadItunesLibrary(object sender, DoWorkEventArgs e)
         {
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             Exception workerException = default(ApplicationException);
             _itunesLibrary = default(LibraryParser);
@@ -104,7 +97,7 @@ namespace ITunesLibrarySynchronizer
         private void OpenFolderBrowser(object sender, RoutedEventArgs e)
         {
             // open folder browser
-            System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
+            var dlg = new System.Windows.Forms.FolderBrowserDialog();
             if (!String.IsNullOrEmpty(tbSynchFolder.Text))
                 dlg.SelectedPath = tbSynchFolder.Text;
 
@@ -122,12 +115,11 @@ namespace ITunesLibrarySynchronizer
         private void StartLibrarySynchronization(object sender, RoutedEventArgs e)
         {
             _bgWrk = null;
-            prgbSynchronization.SetValue(ProgressBar.ValueProperty, 0.0);
+            prgbSynchronization.SetValue(RangeBase.ValueProperty, 0.0);
 
-            _bgWrk = new BackgroundWorker();
-            _bgWrk.WorkerSupportsCancellation = true;
-            _bgWrk.DoWork += new DoWorkEventHandler(DoSynchronizationWork);
-            _bgWrk.RunWorkerCompleted += new RunWorkerCompletedEventHandler(SynchronizationComplete);
+            _bgWrk = new BackgroundWorker {WorkerSupportsCancellation = true};
+            _bgWrk.DoWork += DoSynchronizationWork;
+            _bgWrk.RunWorkerCompleted += SynchronizationComplete;
             _bgWrk.RunWorkerAsync(_itunesLibrary.Library);
 
             btnStartSynch.IsEnabled = false;
@@ -137,18 +129,21 @@ namespace ITunesLibrarySynchronizer
         void SynchronizationComplete(object sender, RunWorkerCompletedEventArgs e)
         {
             var msgObj = e.Result as BackgroundWorkerMessage;
-            if (msgObj.WorkerException != null)
-                sbBottomStatusMessage.Text = "Error: Failed synchronizing ITunes Library, check configuration!";
-            else
-                sbBottomStatusMessage.Text = "Status: " + msgObj.WorkResult + " records synchronized in " + msgObj.MilisecondsElapsed + "ms!";
+            if (msgObj != null)
+            {
+                if (msgObj.WorkerException != null)
+                    sbBottomStatusMessage.Text = "Error: Failed synchronizing ITunes Library, check configuration!";
+                else
+                    sbBottomStatusMessage.Text = "Status: " + msgObj.WorkResult + " records synchronized in " + msgObj.MilisecondsElapsed + "ms!";
 
-            Dispatcher.BeginInvoke(DispatcherPriority.Background,
-                (SendOrPostCallback)delegate(object cancelFlag)
-                {
-                    btnStartSynch.IsEnabled = true;
-                    btnStopSynch.IsEnabled = false;
-                    tbProgressText.Text = ((bool)cancelFlag ? "Synchronization was cancelled!" : "Synchronization complete!");
-                }, msgObj.Cancelled);
+                Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                                       (SendOrPostCallback)delegate(object cancelFlag)
+                                                               {
+                                                                   btnStartSynch.IsEnabled = true;
+                                                                   btnStopSynch.IsEnabled = false;
+                                                                   tbProgressText.Text = ((bool)cancelFlag ? "Synchronization was cancelled!" : "Synchronization complete!");
+                                                               }, msgObj.Cancelled);
+            }
         }
 
         internal class SynchronizationStateObject
@@ -159,7 +154,7 @@ namespace ITunesLibrarySynchronizer
 
         private void DoSynchronizationWork(object sender, DoWorkEventArgs e)
         {
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             Exception workerException = default(ApplicationException);
 
@@ -170,43 +165,45 @@ namespace ITunesLibrarySynchronizer
                 var library = e.Argument as List<LibraryEntry>;
                 var synchronizer = new FileSynchronizer();
 
-                foreach (var track in library)
-                {
-                    using (var resolver = new PathResolver(track.Data))
+                if (library != null)
+                    foreach (var track in library)
                     {
-                        var sourcePath = resolver.ResolveSourcePath();
-                        var targetPath = resolver.BuildTargetPath();
-
-                        synchronizer.Synchronize(sourcePath, targetPath, false);
-
-                        processCount++;
-                    }
-
-                    var currBgWrk = sender as BackgroundWorker;
-
-                    if (currBgWrk.CancellationPending)
-                    {
-                        sw.Stop();
-                        e.Result = new BackgroundWorkerMessage
+                        using (var resolver = new PathResolver(track.Data))
                         {
-                            MilisecondsElapsed = sw.ElapsedMilliseconds,
-                            WorkResult = processCount,
-                            Cancelled = true
-                        };
-                        break;
-                    }
+                            var sourcePath = resolver.ResolveSourcePath();
+                            var targetPath = resolver.BuildTargetPath();
 
-                    // set progress
-                    progress += (100 / (double)library.Count);
-                    Dispatcher.BeginInvoke(
-                        DispatcherPriority.Background,
-                        (SendOrPostCallback)delegate
-                        {
-                            prgbSynchronization.SetValue(ProgressBar.ValueProperty, progress);
-                            prgbProcessAmount.SetValue(TextBlock.TextProperty, string.Format("{0}% done!", Math.Round(progress, 2)));
-                            tbProgressText.SetValue(TextBlock.TextProperty, "Processed " + processCount + " of " + library.Count + " tracks!");
-                        }, null);
-                }
+                            synchronizer.Synchronize(sourcePath, targetPath, false);
+
+                            processCount++;
+                        }
+
+                        var currBgWrk = sender as BackgroundWorker;
+
+                        if (currBgWrk != null)
+                            if (currBgWrk.CancellationPending)
+                            {
+                                sw.Stop();
+                                e.Result = new BackgroundWorkerMessage
+                                               {
+                                                   MilisecondsElapsed = sw.ElapsedMilliseconds,
+                                                   WorkResult = processCount,
+                                                   Cancelled = true
+                                               };
+                                break;
+                            }
+
+                        // set progress
+                        progress += (100 / (double)library.Count);
+                        Dispatcher.BeginInvoke(
+                            DispatcherPriority.Background,
+                            (SendOrPostCallback)delegate
+                                                    {
+                                                        prgbSynchronization.SetValue(RangeBase.ValueProperty, progress);
+                                                        prgbProcessAmount.SetValue(TextBlock.TextProperty, string.Format("{0}% done!", Math.Round(progress, 2)));
+                                                        tbProgressText.SetValue(TextBlock.TextProperty, "Processed " + processCount + " of " + library.Count + " tracks!");
+                                                    }, null);
+                    }
             }
             catch (ApplicationException synchException)
             {

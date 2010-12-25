@@ -5,7 +5,7 @@ using System.Text;
 
 namespace schaermu.utils.linq.itunes.Cache
 {
-    public static class CacheProvider
+    public class CacheProvider
     {
         private static readonly object _lock = new object();
         // TODO: make selection of cacheservice dynamic/configureable

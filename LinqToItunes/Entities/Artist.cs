@@ -21,9 +21,18 @@ namespace schaermu.utils.linq.itunes
                 // lazy initialization of genre cache
                 List<Genre> _data;
                 Initializers.InitializeGenreCache(out _data);
-                foreach (var item in _data.Where()
+                foreach (var item in _data)
                     yield return item;
             }
         }
+
+        #region Implementation of IEnumerable
+
+        public IEnumerator GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

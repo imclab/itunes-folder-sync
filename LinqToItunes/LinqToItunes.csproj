@@ -41,8 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\CacheFactory.cs" />
+    <Compile Include="Cache\CacheProvider.cs" />
     <Compile Include="Cache\ICacheService.cs" />
     <Compile Include="Cache\InMemoryCache.cs" />
+    <Compile Include="Context\Initializers.cs" />
     <Compile Include="Context\ItuneContext.cs" />
     <Compile Include="Entities\Artist.cs" />
     <Compile Include="Entities\Genre.cs" />

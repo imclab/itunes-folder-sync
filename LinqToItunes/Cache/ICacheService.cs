@@ -13,7 +13,7 @@ namespace schaermu.utils.linq.itunes.Cache
             Key = key;
         }
     }
-    interface ICacheService
+    public interface ICacheService
     {
         void AddItem<T>(string key, T data);
         void AddItem<T>(string key, T data, DateTime expiration);

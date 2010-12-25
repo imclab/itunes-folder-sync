@@ -8,7 +8,7 @@ namespace schaermu.utils.linq.itunes.Cache
 {
     public class InMemoryCache : ICacheService
     {
-        private Hashtable _storage = new HashTable();
+        private Hashtable _storage = new Hashtable();
 
         #region ICacheService Members
 
@@ -31,7 +31,8 @@ namespace schaermu.utils.linq.itunes.Cache
         public T GetItem<T>(string key)
         {
             if (_storage.ContainsKey(key))
-                return _storage[key] as T;
+                return (T)_storage[key];
+            return default(T);
         }
 
         public bool TryGetItem<T>(string key, out T data)
@@ -43,6 +44,7 @@ namespace schaermu.utils.linq.itunes.Cache
             }
             catch
             {
+                data = default(T);
                 return false;
             }
         }
