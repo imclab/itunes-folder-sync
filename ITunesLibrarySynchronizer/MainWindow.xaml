@@ -1,0 +1,103 @@
+﻿<Window x:Class="ITunesLibrarySynchronizer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="312" Width="510" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>  
+            <RowDefinition Height="20"></RowDefinition>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0">
+            <TabControl DockPanel.Dock="Top" Margin="4">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Media/arrow_refresh.png"></Image>
+                            <TextBlock Text="Run" Margin="4,0,0,0" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <TabItem.Content>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="20"></RowDefinition>
+                                    <RowDefinition Height="60"></RowDefinition>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="20"></RowDefinition>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Margin="2">ITunes Library Location:</TextBlock>
+                                <TextBlock Name="tbITunesLibraryLocation" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Margin="2"></TextBlock>
+                                
+                                <TextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Top" Margin="2,4,2,2">Synchronization Options:</TextBlock>
+
+                                <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal">
+                                    <Button Name="btnStartSynch" Width="100" Click="StartLibrarySynchronization" Margin="4" HorizontalAlignment="Left">Start!</Button>
+                                    <Button Name="btnStopSynch"  Width="100" Click="StopLibrarySynchronization" Margin="4" HorizontalAlignment="Left">Stop!</Button>
+                                </StackPanel>                              
+                                
+                                <ProgressBar Maximum="100" Minimum="0" Name="prgbSynchronization" Grid.ColumnSpan="2" Grid.Row="4" Margin="2"></ProgressBar>
+                                <TextBlock Grid.ColumnSpan="2" Grid.Row="4" Name="prgbProcessAmount" Margin="10,0,0,0" FontSize="11" VerticalAlignment="Center"></TextBlock>
+                                
+                                <TextBlock Grid.ColumnSpan="2" Grid.Row="5" Name="tbProgressText" Margin="2"></TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </TabItem.Content>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Media/wrench_orange.png"></Image>
+                            <TextBlock Text="Settings" Margin="4,0,0,0" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <TabItem.Content>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="100"></RowDefinition>
+                                    <RowDefinition Height="60"></RowDefinition>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock VerticalAlignment="Center" Text="Synchronization Target:" Grid.Row="0" Margin="2"></TextBlock>
+
+                                <DockPanel Margin="2" Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Name="tbSynchFolder" VerticalAlignment="Center"></TextBlock>
+                                    <Button Name="btnSelectSynchFolder" Click="OpenFolderBrowser" Width="100" Height="25" HorizontalAlignment="Right">
+                                        <TextBlock Text="Select..."></TextBlock>
+                                    </Button>
+                                </DockPanel>                              
+                                
+                                <TextBlock Text="Folder Structure:" Grid.Row="1" Margin="2"></TextBlock>
+                                <TextBox Grid.Row="1" Grid.Column="1" Margin="2" Name="tbStructurePattern"></TextBox>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Margin="2" TextWrapping="Wrap">
+                                        Allowed Placeholders:<LineBreak /><Bold>%genre% %artist% %album% %year% %dateadded%</Bold>  
+                                </TextBlock>
+                                <DockPanel Grid.Row="3" Grid.Column="1">
+                                    <Button Width="75" Margin="2" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Name="btnSaveSettings" Click="SaveSettings">
+                                        <TextBlock Text="Save"></TextBlock>
+                                    </Button>
+                                    <Image Opacity="0.0" Name="imgSaveIndicator" Source="Media/accept.png" Width="15" Height="15" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0"></Image>
+                                </DockPanel>                                
+                            </Grid>
+                        </StackPanel>
+                    </TabItem.Content>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+        <StatusBar x:Name="sbBottomStatus" Height="20" Grid.Row="1">
+            <TextBlock x:Name="sbBottomStatusMessage" VerticalAlignment="Center" FontSize="11"></TextBlock>
+        </StatusBar>
+    </Grid>
+</Window>
